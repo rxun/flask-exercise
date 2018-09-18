@@ -53,6 +53,81 @@ def mirror(name):
 
 
 # TODO: Implement the rest of the API here!
+@app.route("/users", methods=["GET","POST"])
+def users():
+	if request.method == "GET":
+		
+		team = request.args.get("team")
+		
+		if not team:
+			data = {"users": db.get("users")}
+			return create_response(data)
+		
+		users = db.get("users")
+		team_users = [u for u in users if u["team"] == team]
+		data = {"users": team_users}
+		
+		return create_response(data)
+	
+	else:
+		
+		name = request.args.get("name")
+		age = request.args.get("age")
+		team = request.args.get("team")
+		
+		if name is None or age is None or team is None:
+			return create_response(None, 422,
+			"You are missing necessary parameters"
+			)
+		
+		else:
+			payload = {
+				"name": name,
+				"age": age,
+				"team": team
+			}
+			
+			newUser = db.create("users", payload)
+			
+			return create_response(newUser, 201)
+			
+	
+@app.route("/users/<int:id>", methods=["GET","PUT","DELETE"])
+def getUserFromID(id):
+	
+	user = db.getById("users", id)
+	
+	if user is None:
+		return create_response(user, 404, 
+		"There is no user with that ID"
+		)
+	
+	if request.method == "GET":
+	
+		return create_response(user)
+		
+	elif request.method == "PUT":
+		
+		name = request.args.get("name")
+		age = request.args.get("age")
+		team = request.args.get("team")
+		
+		update_values = {
+			"name": name,
+			"age": age,
+			"team": team
+		}
+		
+		newUser = db.updateById("users", id, update_values)
+		return create_response(newUser)
+	
+	elif request.method == "DELETE":
+		
+		db.deleteById("users", id)
+		return create_response(None, 200, "You have removed user " + str(id))
+		
+		
+
 
 """
 ~~~~~~~~~~~~ END API ~~~~~~~~~~~~

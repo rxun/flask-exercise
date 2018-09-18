@@ -31,6 +31,9 @@ def tests_get_users_with_team(client):
     assert len(res_users) == 2
     assert res_users[1]["name"] == "Tim"
 
+def tests_get_user_with_id(client):
+	res = client.getById("/users","1")
+	assert res["name"] == "Aria"
 
 def test_get_user_id(client):
     res = client.get("/users/1")
@@ -39,3 +42,20 @@ def test_get_user_id(client):
     res_user = res.json["result"]["user"]
     assert res_user["name"] == "Aria"
     assert res_user["age"] == 19
+
+def test_create_user(client):
+	
+	#Test successful request
+	body = {"name": "David", "age": 100, "team": "Kiva"}
+	res = client.post("/users", json=body)
+	assert res.status_code == 201
+	res_user = res.json["result"]["user"]
+	assert res_user["name"] == "David"
+	
+	#Test bad request
+	body = {"name": "Lato", "age": 28}
+	res = client.post("/users", json=body)
+	assert res.status_code == 422
+	assert len(res.json["message"]) > 0
+	
+	
